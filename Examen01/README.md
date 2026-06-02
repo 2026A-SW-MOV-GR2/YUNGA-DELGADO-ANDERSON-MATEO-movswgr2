@@ -5,7 +5,7 @@
 
 ---
 
-## Estructura del Proyecto (Real)
+## Estructura del Proyecto 
 
 ```
 Examen01/
