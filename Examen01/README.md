@@ -95,14 +95,3 @@ Se ha rediseñado la `HomePage` para ofrecer una experiencia de usuario superior
 ```bash
 flutter test test/repository_test.dart
 ```
-
----
-
-## Rúbrica Cubierta
-
-| Criterio | Estado | Detalle |
-|---|---|---|
-| ✅ Persistencia Dual | 100% | Conmutación en caliente entre SQL y NoSQL |
-| ✅ Arquitectura | 100% | Clean Architecture simplificada + Repositorio |
-| ✅ Calidad UI | 100% | Diseño moderno, manejo de errores de imagen y fluidez |
-| ✅ Unit Testing | 100% | Cobertura de guardado y conmutación de motores |
