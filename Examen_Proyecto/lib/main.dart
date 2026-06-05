@@ -11,22 +11,22 @@ import 'data/repositories/content_repository_impl.dart';
 import 'presentation/pages/favorites_page.dart';
 import 'presentation/pages/home_page.dart';
 import 'presentation/pages/library_page.dart';
+import 'presentation/pages/network/network_page.dart';       // ← NUEVO
+import 'presentation/pages/secrets/secrets_pages.dart';      // ← NUEVO (Note: secrets_pages.dart)
 import 'presentation/providers/content_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Inicializar Hive (NoSQL)
   await Hive.initFlutter();
   AppLogger.info('Hive inicializado', tag: 'main');
 
-  // Inyección de dependencias manual
   final sqlDs = SqlDatasource();
   final noSqlDs = NoSqlDatasource();
   final repository = ContentRepositoryImpl(
     sqlDatasource: sqlDs,
     noSqlDatasource: noSqlDs,
-    useNoSql: false, // Arranca en modo SQL por defecto
+    useNoSql: false,
   );
 
   AppLogger.info('CineTrack iniciando...', tag: 'main');
@@ -63,10 +63,12 @@ class _MainShell extends StatefulWidget {
 class _MainShellState extends State<_MainShell> {
   int _currentIndex = 0;
 
-  static const List<Widget> _pages = [
+  static const _pages = [
     HomePage(),
     LibraryPage(),
     FavoritesPage(),
+    NetworkPage(),      // ← NUEVO (Módulo 1)
+    SecretsPage(),      // ← NUEVO (Módulo 3)
   ];
 
   @override
@@ -88,12 +90,22 @@ class _MainShellState extends State<_MainShell> {
           NavigationDestination(
             icon: Icon(Icons.video_library_outlined),
             selectedIcon: Icon(Icons.video_library),
-            label: 'Mi Biblioteca',
+            label: 'Biblioteca',
           ),
           NavigationDestination(
             icon: Icon(Icons.favorite_outline),
             selectedIcon: Icon(Icons.favorite),
             label: 'Favoritos',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.cloud_outlined),
+            selectedIcon: Icon(Icons.cloud),
+            label: 'REST API',           // ← NUEVO
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.lock_outline),
+            selectedIcon: Icon(Icons.lock),
+            label: 'Secretos',           // ← NUEVO
           ),
         ],
       ),

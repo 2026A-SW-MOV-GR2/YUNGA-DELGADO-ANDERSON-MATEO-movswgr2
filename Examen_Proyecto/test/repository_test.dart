@@ -41,6 +41,16 @@ class _FakeSqlDs extends SqlDatasource {
     }
   }
 
+  @override
+  Future<List<ContentModel>> getByType(ContentType type) async {
+    return _store.where((e) => e.type == type).toList();
+  }
+
+  @override
+  Future<List<ContentModel>> getFavorites() async {
+    return _store.where((e) => e.isFavorite).toList();
+  }
+
   List<ContentModel> get store => _store;
 }
 
@@ -63,6 +73,16 @@ class _FakeNoSqlDs extends NoSqlDatasource {
 
   @override
   Future<ContentModel?> getById(String id) async => _store[id];
+
+  @override
+  Future<List<ContentModel>> getByType(ContentType type) async {
+    return _store.values.where((e) => e.type == type).toList();
+  }
+
+  @override
+  Future<List<ContentModel>> getFavorites() async {
+    return _store.values.where((e) => e.isFavorite).toList();
+  }
 
   Map<String, ContentModel> get store => _store;
 }
@@ -134,5 +154,69 @@ void main() {
     expect(noSqlDs.store['test-002']?.title, 'Breaking Bad');
 
     AppLogger.info('TEST 2 PASADO ✅', tag: 'TEST');
+  });
+
+  test('Prueba 3: Actualización de datos en el motor activo', () async {
+    AppLogger.info('=== TEST 3: Actualización ===', tag: 'TEST');
+
+    await repo.save(sampleMovie);
+    final updatedMovie = sampleMovie.copyWith(title: 'Inception Redux', rating: 4.5);
+    
+    await repo.update(updatedMovie);
+
+    final stored = await repo.getById(sampleMovie.id);
+    expect(stored?.title, 'Inception Redux');
+    expect(stored?.rating, 4.5);
+    
+    AppLogger.info('TEST 3 PASADO ✅', tag: 'TEST');
+  });
+
+  test('Prueba 4: Eliminación de datos en el motor activo', () async {
+    AppLogger.info('=== TEST 4: Eliminación ===', tag: 'TEST');
+
+    repo.switchEngine(toNoSql: true);
+    await repo.save(sampleSeries);
+    
+    expect((await repo.getAll()).length, 1);
+    
+    await repo.delete(sampleSeries.id);
+    
+    expect((await repo.getAll()).length, 0);
+    AppLogger.info('TEST 4 PASADO ✅', tag: 'TEST');
+  });
+
+  test('Prueba 5: Filtrado por tipo (Película/Serie)', () async {
+    AppLogger.info('=== TEST 5: Filtrado por Tipo ===', tag: 'TEST');
+
+    await repo.save(sampleMovie);
+    await repo.save(sampleSeries);
+
+    final movies = await repo.getByType(ContentType.movie);
+    final series = await repo.getByType(ContentType.series);
+
+    expect(movies.length, 1);
+    expect(movies.first.title, 'Inception');
+    expect(series.length, 1);
+    expect(series.first.title, 'Breaking Bad');
+
+    AppLogger.info('TEST 5 PASADO ✅', tag: 'TEST');
+  });
+
+  test('Prueba 6: Recuperación de Favoritos', () async {
+    AppLogger.info('=== TEST 6: Favoritos ===', tag: 'TEST');
+
+    final favMovie = sampleMovie.copyWith(id: 'fav-1', isFavorite: true);
+    final nonFavMovie = sampleMovie.copyWith(id: 'fav-2', isFavorite: false);
+
+    await repo.save(favMovie);
+    await repo.save(nonFavMovie);
+
+    final favorites = await repo.getFavorites();
+
+    expect(favorites.length, 1);
+    expect(favorites.first.id, 'fav-1');
+    expect(favorites.first.isFavorite, isTrue);
+
+    AppLogger.info('TEST 6 PASADO ✅', tag: 'TEST');
   });
 }
